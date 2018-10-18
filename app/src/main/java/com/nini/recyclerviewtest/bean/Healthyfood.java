@@ -1,4 +1,4 @@
-package com.nini.recyclerviewtest;
+package com.nini.recyclerviewtest.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +35,8 @@ public class Healthyfood implements Parcelable {
 
 
     public Healthyfood() {
+
+
     }
 
 

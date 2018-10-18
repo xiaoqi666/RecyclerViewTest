@@ -1,15 +1,24 @@
 package com.nini.recyclerviewtest;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.nini.recyclerviewtest.adapter.MyAdapter;
+import com.nini.recyclerviewtest.bean.Healthyfood;
+import com.nini.recyclerviewtest.broadcast.MyStaticBroadcastReceiver;
+
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -26,12 +35,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (Healthyfood.datas == null)
             initData();//初始化展示的数据
         initEvent();//初始化事件
+        initBoardCast();//发送广播
+    }
+
+    /**
+     * 启动app的时候发送广播
+     */
+    private void initBoardCast() {
+        Intent intent = new Intent("com.lv.appstart");
+        Random random = new Random();
+        int position = random.nextInt(Healthyfood.datas.size());
+        intent.putExtra("position", position);
+       // if (Build.VERSION.SDK_INT >= 26) {//判断版本号是否大于26
+            //Android8.0  需要设置ComponentName
+            intent.setComponent(new ComponentName(this/*上下文对象*/, MyStaticBroadcastReceiver.class/*广播接收者的类*/));
+      //  }
+
+
+        sendBroadcast(intent);
+        Log.e("TAG", "------------initBoardCast-------------------");
     }
 
     private void initEvent() {
         myAdapter = new MyAdapter(this);
         recyclerview.setAdapter(myAdapter);
         recyclerview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL/*垂直*/, false/*不逆序*/));
+
+        recyclerview.setItemAnimator(new DefaultItemAnimator());//默认动画
+
 
         //条目被点击的时候
         myAdapter.setOnItemClickListener(new MyAdapter.OnItemClickListener() {

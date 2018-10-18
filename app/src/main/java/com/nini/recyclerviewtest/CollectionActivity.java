@@ -6,12 +6,19 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.nini.recyclerviewtest.bean.Healthyfood;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
@@ -23,6 +30,25 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
     private FloatingActionButton fab;
     private ArrayList<Healthyfood> data;
     private MyAdapter myAdapter;
+    private boolean isFisrtRegister = true;
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (isFisrtRegister) {
+            isFisrtRegister = false;
+            EventBus.getDefault().register(this);
+            Log.e("TAG", "------register---------");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+        Log.e("TAG", "-------------unregister-------------");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +57,22 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
         initView();//初始化布局
         initData();//初始化数据
         initEvent();//初始化事件
+
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMessage(Healthyfood healthyfood) {
+        if (data != null && myAdapter != null) {
+            if (healthyfood.isCollected()) {
+                data.add(healthyfood);
+            } else {
+                data.remove(healthyfood);
+            }
+            myAdapter.notifyDataSetChanged();
+        }
+        Log.e("TAG", "------onEventMessage---------");
+    }
+
 
     private void initEvent() {
         myAdapter = new MyAdapter();
@@ -44,7 +85,7 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
                 int i = Healthyfood.datas.indexOf(data.get(position));
                 intent.putExtra("position", i);
                 startActivity(intent);
-                finish();//关闭这个界面
+                //  finish();//关闭这个界面
             }
         });
 
@@ -111,7 +152,6 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
                 Intent intent = new Intent(CollectionActivity.this, MainActivity.class);
                 intent.putExtra("activity", "CollectionActivity");
                 startActivity(intent);
-                finish();
                 break;
         }
     }

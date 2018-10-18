@@ -1,6 +1,7 @@
 package com.nini.recyclerviewtest;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -11,7 +12,11 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.nini.recyclerviewtest.bean.Healthyfood;
+import com.nini.recyclerviewtest.broadcast.MyDyncBroadcastReceiver;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 
@@ -27,11 +32,34 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private Healthyfood healthyfood;
     private ImageButton ib_collect;
     private ListView lv_detail;
+    private int position;
+    private MyDyncBroadcastReceiver myDyncBroadcastReceiver;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(myDyncBroadcastReceiver);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        /**
+         * 注册广播
+         */
+        myDyncBroadcastReceiver = new MyDyncBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter("com.lw.collection");
+        registerReceiver(myDyncBroadcastReceiver, intentFilter);
+
         initView();//初始化布局
         initData();//初始化数据
         initEvent();
@@ -44,7 +72,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private void initData() {
         Intent intent = getIntent();
         //获取点击的那个item
-        int position = intent.getIntExtra("position", 0);
+        position = intent.getIntExtra("position", 0);
         //获取点击的对象
         healthyfood = Healthyfood.datas.get(position);
 
@@ -82,18 +110,19 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ib_back:
-//                Intent intent = new Intent(DetailActivity.this, MainActivity.class);
-//                intent.putExtra("activity", "DetailActivity");
-//                startActivity(intent);
                 finish();
                 break;
             case R.id.ib_star:
                 //讲收藏状态置反
                 healthyfood.setCollected(!healthyfood.isCollected());
+                EventBus.getDefault().post(healthyfood);//发送订阅消息
+
                 //根据新的状态,更新小星星
                 if (healthyfood.isCollected()) {//如果当前是收藏状态
                     ib_star.setBackgroundResource(R.drawable.full_star);
-                    Toast.makeText(this, "**\"已收藏\"**", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent("com.lw.collection");
+                    intent.putExtra("position", position);
+                    sendBroadcast(intent);
                 } else {
                     ib_star.setBackgroundResource(R.drawable.empty_star);
                 }

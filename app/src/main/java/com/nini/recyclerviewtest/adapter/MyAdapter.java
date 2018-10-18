@@ -1,4 +1,4 @@
-package com.nini.recyclerviewtest;
+package com.nini.recyclerviewtest.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -7,14 +7,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.nini.recyclerviewtest.bean.Healthyfood;
+import com.nini.recyclerviewtest.R;
 
 import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private ArrayList<Healthyfood> datas;
     private Context mContxt;
-    private OnItemClickListener onItemClickListener;
     private OnItemLongClickListener onItemLongClickListener;
 
     public MyAdapter(Context context) {
@@ -43,7 +44,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         return datas.size();
     }
 
-
     class MyViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvSimpletype;
@@ -53,16 +53,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             super(view);
             tvSimpletype = (TextView) view.findViewById(R.id.tv_simpletype);
             tvFoodname = (TextView) view.findViewById(R.id.tv_foodname);
-
-            //监控item的点击事件
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onItemClickListener != null) {
-                        onItemClickListener.onItemClick(v, getLayoutPosition());
-                    }
-                }
-            });
 
             //设置item的长按事件
             view.setOnLongClickListener(new View.OnLongClickListener() {
@@ -74,8 +64,36 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     return true;//消化掉事件,不再向下传递(不然触发  点击事件)
                 }
             });
+
+
+            //监控item的点击事件
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onItemClickListener != null) {
+                        onItemClickListener.onItemClick(v, getLayoutPosition());
+                    }
+                }
+            });
         }
     }
+
+    private OnItemClickListener onItemClickListener;
+
+    public interface OnItemClickListener {
+
+        void onItemClick(View view, int position);
+    }
+
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+
+        this.onItemClickListener = onItemClickListener;
+    }
+
+
+
+
 
     /**
      * 长按某条的事件监听
@@ -93,27 +111,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         this.onItemLongClickListener = onItemLongClickListener;
     }
 
-    /**
-     * 点击RecyclerView 某条的监听
-     */
-    public interface OnItemClickListener {
-        /**
-         * 某条被点击的时候回调
-         *
-         * @param view     点击的布局
-         * @param position 点击的位置
-         */
-        void onItemClick(View view, int position);
-    }
-
-    /**
-     * 设置点击事件
-     *
-     * @param onItemClickListener
-     */
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
-        this.onItemClickListener = onItemClickListener;
-    }
 
 
     /**
