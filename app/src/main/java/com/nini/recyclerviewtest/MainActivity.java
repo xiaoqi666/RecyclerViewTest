@@ -46,10 +46,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Random random = new Random();
         int position = random.nextInt(Healthyfood.datas.size());
         intent.putExtra("position", position);
-       // if (Build.VERSION.SDK_INT >= 26) {//判断版本号是否大于26
+        if (Build.VERSION.SDK_INT >= 26) {//判断版本号是否大于26
             //Android8.0  需要设置ComponentName
             intent.setComponent(new ComponentName(this/*上下文对象*/, MyStaticBroadcastReceiver.class/*广播接收者的类*/));
-      //  }
+        }
 
 
         sendBroadcast(intent);
