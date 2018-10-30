@@ -5,6 +5,7 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -18,8 +19,6 @@ import com.nini.recyclerviewtest.broadcast.MyDyncBroadcastReceiver;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
-
 public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ImageButton ib_back;
@@ -28,17 +27,16 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private RelativeLayout rl;
     private TextView tv_type;
     private TextView tv_yingyang;
-    private ArrayList<Healthyfood> datas;
     private Healthyfood healthyfood;
     private ImageButton ib_collect;
     private ListView lv_detail;
     private int position;
     private MyDyncBroadcastReceiver myDyncBroadcastReceiver;
+    private Intent intent;
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
+    protected void onRestart() {
+        super.onRestart();
     }
 
     @Override
@@ -60,9 +58,22 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         IntentFilter intentFilter = new IntentFilter("com.lw.collection");
         registerReceiver(myDyncBroadcastReceiver, intentFilter);
 
+
         initView();//初始化布局
         initData();//初始化数据
         initEvent();
+    }
+
+    /**
+     * 如果activity已经存在, android:launchMode="singleTask"
+     * 则第二次启动的时候走这个方法
+     *
+     * @param intent
+     */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        this.intent = intent;
     }
 
     private void initEvent() {
@@ -70,9 +81,10 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initData() {
-        Intent intent = getIntent();
+        intent = getIntent();
         //获取点击的那个item
         position = intent.getIntExtra("position", 0);
+        Log.e("TAG", "-------position----------" + position);
         //获取点击的对象
         healthyfood = Healthyfood.datas.get(position);
 
@@ -84,11 +96,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         rl.setBackgroundColor(Color.parseColor(healthyfood.getColor()));
         tv_yingyang.setText("富含  " + healthyfood.getNutrientSubstance());
 
-        if (healthyfood.isCollected()) {//如果当前是收藏状态
-            ib_star.setBackgroundResource(R.drawable.full_star);//设置成实心星星
-        } else {
-            ib_star.setBackgroundResource(R.drawable.empty_star);
-        }
+//        if (healthyfood.isCollected()) {//如果当前是收藏状态
+//            ib_star.setBackgroundResource(R.drawable.full_star);//设置成实心星星
+//        } else {
+        ib_star.setBackgroundResource(R.drawable.empty_star);
+        //    }
     }
 
     private void initView() {
@@ -116,7 +128,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 //讲收藏状态置反
                 healthyfood.setCollected(!healthyfood.isCollected());
                 EventBus.getDefault().post(healthyfood);//发送订阅消息
-
                 //根据新的状态,更新小星星
                 if (healthyfood.isCollected()) {//如果当前是收藏状态
                     ib_star.setBackgroundResource(R.drawable.full_star);

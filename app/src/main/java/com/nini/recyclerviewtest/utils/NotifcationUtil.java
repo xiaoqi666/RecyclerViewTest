@@ -41,7 +41,6 @@ public class NotifcationUtil {
         mNotifyMgr.notify(id, mBuilder.build());//第一个参数为自定义的通知唯一标识
     }
 
-
     /**
      * 适配android 8.0
      *

@@ -21,15 +21,25 @@
         <activity android:name=".DetailActivity" />
         <activity
             android:name=".CollectionActivity"
-            android:launchMode="singleTask"></activity>
+            android:launchMode="singleTask" />
 
         <receiver
             android:name=".broadcast.MyStaticBroadcastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.lv.appstart"></action>
+                <action android:name="com.lv.appstart" />
             </intent-filter>
+        </receiver>
+        <receiver android:name=".widget.NewAppWidget">
+            <intent-filter>
+                <action android:name="com.lv.appstart" />
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/new_app_widget_info" />
         </receiver>
     </application>
 

@@ -50,10 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //Android8.0  需要设置ComponentName
             intent.setComponent(new ComponentName(this/*上下文对象*/, MyStaticBroadcastReceiver.class/*广播接收者的类*/));
         }
-
-
         sendBroadcast(intent);
-        Log.e("TAG", "------------initBoardCast-------------------");
     }
 
     private void initEvent() {
