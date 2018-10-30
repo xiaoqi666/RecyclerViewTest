@@ -19,6 +19,9 @@ import com.nini.recyclerviewtest.broadcast.MyDyncBroadcastReceiver;
 
 import org.greenrobot.eventbus.EventBus;
 
+/**
+ * 食品的详情页面
+ */
 public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ImageButton ib_back;
@@ -35,16 +38,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private Intent intent;
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
+        //activity销毁的时候,解注册
         unregisterReceiver(myDyncBroadcastReceiver);
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,22 +51,24 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
         /**
          * 注册广播
+         * MyDyncBroadcastReceiver  动态广播
          */
         myDyncBroadcastReceiver = new MyDyncBroadcastReceiver();
+        //设置过滤
         IntentFilter intentFilter = new IntentFilter("com.lw.collection");
+        //注册广播
         registerReceiver(myDyncBroadcastReceiver, intentFilter);
-
 
         initView();//初始化布局
         initData();//初始化数据
-        initEvent();
+        initEvent();//初始化事件
     }
 
     /**
-     * 如果activity已经存在, android:launchMode="singleTask"
+     * 如果activity已经存在, 配置文件中设置启动方式为:android:launchMode="singleTask"
      * 则第二次启动的时候走这个方法
      *
-     * @param intent
+     * @param intent widget跳转到该界面,携带今日推荐的食品的位置信息,"position"
      */
     @Override
     protected void onNewIntent(Intent intent) {
@@ -80,29 +80,35 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         lv_detail.setAdapter(new MyAdapter());
     }
 
+    /**
+     * 初始化数据
+     */
     private void initData() {
         intent = getIntent();
-        //获取点击的那个item
+        /**
+         * 从widget或者MainActivity中携带数据的intent中获取食品的的位置信息
+         */
         position = intent.getIntExtra("position", 0);
         Log.e("TAG", "-------position----------" + position);
-        //获取点击的对象
+        /**
+         * 根据位置信息获取到食品对象
+         */
         healthyfood = Healthyfood.datas.get(position);
 
-        /*
-         * 设置界面显示的数据
+        /**
+         * 讲食品对象的属性展示在界面上
          */
         tv_name.setText(healthyfood.getFoodName());
         tv_type.setText(healthyfood.getFullType());
         rl.setBackgroundColor(Color.parseColor(healthyfood.getColor()));
         tv_yingyang.setText("富含  " + healthyfood.getNutrientSubstance());
 
-//        if (healthyfood.isCollected()) {//如果当前是收藏状态
-//            ib_star.setBackgroundResource(R.drawable.full_star);//设置成实心星星
-//        } else {
         ib_star.setBackgroundResource(R.drawable.empty_star);
-        //    }
     }
 
+    /**
+     * 初始化布局
+     */
     private void initView() {
         ib_back = (ImageButton) findViewById(R.id.ib_back);
         tv_name = (TextView) findViewById(R.id.tv_name);
@@ -127,18 +133,26 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
             case R.id.ib_star:
                 //讲收藏状态置反
                 healthyfood.setCollected(!healthyfood.isCollected());
-                EventBus.getDefault().post(healthyfood);//发送订阅消息
-                //根据新的状态,更新小星星
+                //发送订阅消息
+                EventBus.getDefault().post(healthyfood);
+                /**
+                 * if-else作用:根据新的状态,更新小星星,并携带位置信息,发送给广播接受者
+                 */
                 if (healthyfood.isCollected()) {//如果当前是收藏状态
                     ib_star.setBackgroundResource(R.drawable.full_star);
+                    /**
+                     * 发送广播,由MyDyncBroadcastReceiver广播接受者接收
+                     * MyDyncBroadcastReceiver在本类中已经动态注册了
+                     */
                     Intent intent = new Intent("com.lw.collection");
+                    //并携带被收藏的食品的位置信息
                     intent.putExtra("position", position);
-                    sendBroadcast(intent);
-                } else {
+                    sendBroadcast(intent);//发送广播
                     ib_star.setBackgroundResource(R.drawable.empty_star);
                 }
                 break;
-            case R.id.ib_collect://调到收藏夹页面
+            case R.id.ib_collect://点击购物车
+                //跳转到收藏夹页面
                 startActivity(new Intent(DetailActivity.this, CollectionActivity.class));
                 finish();//关闭这个界面
                 break;
@@ -147,6 +161,9 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     private String[] items = {"分享信息", "不感兴趣", "查看更多信息", "出错反馈"};
 
+    /**
+     * 展示"分享信息", "不感兴趣", "查看更多信息", "出错反馈"四个条目,暂时没有实际作用,仅仅是显示
+     */
     private class MyAdapter extends BaseAdapter {
 
         @Override

@@ -36,18 +36,18 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onStart() {
         super.onStart();
-        if (isFisrtRegister) {
+        if (isFisrtRegister) {//防止多次注册,多次注册会报错
             isFisrtRegister = false;
+            //注册
             EventBus.getDefault().register(this);
-            Log.e("TAG", "------register---------");
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //反注册
         EventBus.getDefault().unregister(this);
-        Log.e("TAG", "-------------unregister-------------");
     }
 
     @Override
@@ -60,6 +60,11 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
 
     }
 
+    /**
+     * 订阅者,接收的是收藏页面的信息
+     *
+     * @param healthyfood
+     */
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMessage(Healthyfood healthyfood) {
         if (data != null && myAdapter != null) {
@@ -70,7 +75,6 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
             }
             myAdapter.notifyDataSetChanged();
         }
-        Log.e("TAG", "------onEventMessage---------");
     }
 
 
@@ -164,6 +168,9 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    /**
+     * 收藏列表的适配器
+     */
     private class MyAdapter extends BaseAdapter {
 
         @Override

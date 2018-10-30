@@ -17,6 +17,10 @@ import com.nini.recyclerviewtest.widget.NewAppWidget;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * 食品列表界面
+ * RecyclerView + RecyclerView.Adapter + FloatingActionButton
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
 
@@ -24,10 +28,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FloatingActionButton fab;
     private MyAdapter myAdapter;
 
-
+    /**
+     * AndroidManifest.xml文件中为MainActivity配置了launchMode="singleTask"
+     * 所以,该界面二次启动后,将不再走onCreate方法重新实体化界面
+     * 如果app启动后才将widget添加到手机桌面,widget处于"当前没有任何消息"的状态,
+     * 点击后跳到主界面不走onCreate()方法则不会发送静态广播告知widget更新界面
+     * <p>
+     * 但这个时候系统会调用onNewIntent方法,所以在此发送广播,告知widget更新界面
+     * 即更新到"今日推荐 XXXX食品"
+     *
+     * @param intent 开启这个界面的intent,此处并不关心它,因为我们并没有为它设置数据
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        //发送广播
         initBoardCast();
     }
 
@@ -35,26 +50,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //初始化布局
         initView();
+
+        //如果集合中的数据为空,初始化展示的数据
         if (Healthyfood.datas == null)
-            initData();//初始化展示的数据
-        initEvent();//初始化事件
-        initBoardCast();//发送广播
+            initData();
+
+        //初始化事件
+        initEvent();
+
+        //发送广播
+        initBoardCast();
     }
 
     /**
      * 启动app的时候发送广播
      * NewAppWidget也可以收到
-     * 不支持android 8.0
+     * 不支持android 8.0,8.0系统需要设置ComponentName
      */
     private void initBoardCast() {
+        /**
+         * 设置值action常量,并在AndroidManifest.xml中进行配置
+         * 一个是NewAppWidget,一个是MyStaticBroadcastReceiver
+         * 因此,发送的广播,这两个类都可以接收到,
+         * MyStaticBroadcastReceiver 接收到后会发送通知栏消息
+         * NewAppWidget被重写了onReceive方法,接收到后会更新widget的界面,为"今日推荐 XXX"
+         */
         Intent intent = new Intent(NewAppWidget.LUNCH_APP);
+        //随机生成一个小于食品列表个数的数,也就是随机产生一个index,
+        //该index便是被随机推荐的食物在Healthyfood.datas中的位置
         Random random = new Random();
         int position = random.nextInt(Healthyfood.datas.size());
+        //intent携带随机推荐的食品的位置信息,传递给广播接受者
         intent.putExtra("position", position);
+        //发送广播
         sendBroadcast(intent);
     }
 
+
+    /**
+     * 初始化事件
+     * recyclerview设置Adapter(适配器)
+     * recyclerview条目的长按事件和点击事件(这两个事件是由接口回调实现的,recyclerview和RecyclerView.Adapter本身并没有这两个事件)
+     */
     private void initEvent() {
         myAdapter = new MyAdapter(this);
         recyclerview.setAdapter(myAdapter);
@@ -68,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onItemClick(View view, int position) {
                 Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                //传递食品的位置到详情页面,然后详情页面根据食品在集合中的位置获取食品对象,进行详情展示
                 intent.putExtra("position", position);
                 startActivity(intent);
             }
@@ -120,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    /**
+     * 初始化页面布局
+     */
     private void initView() {
         recyclerview = (RecyclerView) findViewById(R.id.recyclerview);
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -127,10 +171,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fab.setOnClickListener(this);
     }
 
+    /**
+     * 点击事件 该方法就一个FloatingActionButton的点击跳转到收藏页面
+     *
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.fab://跳转到收藏页面
+            case R.id.fab:
+                //跳转到收藏页面
                 Intent intent = new Intent(MainActivity.this, CollectionActivity.class);
                 startActivity(intent);
                 break;
