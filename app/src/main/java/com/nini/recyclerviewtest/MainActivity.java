@@ -1,21 +1,18 @@
 package com.nini.recyclerviewtest;
 
-import android.content.ComponentName;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.nini.recyclerviewtest.adapter.MyAdapter;
 import com.nini.recyclerviewtest.bean.Healthyfood;
-import com.nini.recyclerviewtest.broadcast.MyStaticBroadcastReceiver;
+import com.nini.recyclerviewtest.widget.NewAppWidget;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -26,6 +23,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private RecyclerView recyclerview;
     private FloatingActionButton fab;
     private MyAdapter myAdapter;
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        initBoardCast();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,16 +44,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * 启动app的时候发送广播
+     * NewAppWidget也可以收到
+     * 不支持android 8.0
      */
     private void initBoardCast() {
-        Intent intent = new Intent("com.lv.appstart");
+        Intent intent = new Intent(NewAppWidget.LUNCH_APP);
         Random random = new Random();
         int position = random.nextInt(Healthyfood.datas.size());
         intent.putExtra("position", position);
-        if (Build.VERSION.SDK_INT >= 26) {//判断版本号是否大于26
-            //Android8.0  需要设置ComponentName
-            intent.setComponent(new ComponentName(this/*上下文对象*/, MyStaticBroadcastReceiver.class/*广播接收者的类*/));
-        }
         sendBroadcast(intent);
     }
 
