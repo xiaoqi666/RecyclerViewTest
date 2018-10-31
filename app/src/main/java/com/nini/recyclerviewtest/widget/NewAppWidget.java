@@ -37,6 +37,13 @@ public class NewAppWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
+    /**
+     * widget 的默认的界面 , "当前没有任何信息"
+     *
+     * @param context
+     * @param appWidgetManager
+     * @param appWidgetIds
+     */
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews updateView = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);//实例化RemoteView,其对应相应的Widget布局
@@ -48,18 +55,25 @@ public class NewAppWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(me, updateView);
     }
 
+    /**
+     * app启动的时候触发,更新widget界面,"今日推荐  XXX"
+     *
+     * @param context
+     * @param intent
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         String action = intent.getAction();
-        if (action.equals(LUNCH_APP)) {
+        if (action.equals(LUNCH_APP)) {//app启动的时候
             int intExtra = intent.getIntExtra("position", 0);
+            //根据接收到的随机推荐的食品位置序号,获取随机推荐的食物对象
             Healthyfood healthyfood = Healthyfood.datas.get(intExtra);
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             ComponentName me = new ComponentName(context, NewAppWidget.class/*被通知的类*/);
             RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
             rv.setTextViewText(R.id.tv_content, "今日推荐  " + healthyfood.getFoodName());
-            //如果文本显示的是今日推荐,点击后跳转到食物详情页面
+            //设置点击后跳转到食物详情页面
             Intent i = new Intent(context, DetailActivity.class);
             i.putExtra("position", intExtra);
             PendingIntent pi = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);

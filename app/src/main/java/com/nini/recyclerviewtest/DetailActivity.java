@@ -77,6 +77,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initEvent() {
+        //给ListView设置适配器
         lv_detail.setAdapter(new MyAdapter());
     }
 

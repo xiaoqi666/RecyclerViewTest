@@ -16,6 +16,13 @@ import com.nini.recyclerviewtest.bean.Healthyfood;
 import com.nini.recyclerviewtest.utils.NotifcationUtil;
 import com.nini.recyclerviewtest.widget.NewAppWidget;
 
+/**
+ * 动态广播
+ * <p>
+ * 点击收藏出发,接收到广播后做两件事:
+ * 一是发送通知栏消息
+ * 二是更新widget界面 "已收藏 XXX"
+ */
 public class MyDyncBroadcastReceiver extends BroadcastReceiver {
 
     private static int id = 100;
@@ -23,7 +30,6 @@ public class MyDyncBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("TAG", "-------------------MyDyncBroadcastReceiver------------");
         String action = intent.getAction();
         if (action.equals("com.lw.collection")) {
             int position = intent.getIntExtra("position", 0);
@@ -34,13 +40,21 @@ public class MyDyncBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
+    /**
+     * 更新widget界面
+     *
+     * @param context
+     * @param intent
+     */
     private void updateWidget(Context context, Intent intent) {
         int intExtra = intent.getIntExtra("position", 0);
+        //根据传递过来的食品位置,获取对应的食品
         Healthyfood healthyfood = Healthyfood.datas.get(intExtra);
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         ComponentName me = new ComponentName(context, NewAppWidget.class/*被通知的类*/);
         RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
         rv.setTextViewText(R.id.tv_content, "已收藏  " + healthyfood.getFoodName());
+        //设置星星图片被点击后跳转的位置,即收藏界面
         Intent i = new Intent(context, CollectionActivity.class);
         PendingIntent pi = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
         rv.setOnClickPendingIntent(R.id.iv, pi); //设置点击事件

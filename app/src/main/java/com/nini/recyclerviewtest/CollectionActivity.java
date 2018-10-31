@@ -22,6 +22,9 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
+/**
+ * 收藏界面
+ */
 public class CollectionActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView tv_simpletype;
@@ -61,7 +64,9 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
     }
 
     /**
-     * 订阅者,接收的是收藏页面的信息
+     * 订阅者,接收的是详情页面的信息
+     * 若先进入收藏,再进入详情页面,从详情页面取消或者重新收藏,
+     * 此订阅者将会接收到消息,对对应的食品进行处理,然后更新listview界面
      *
      * @param healthyfood
      */
@@ -77,11 +82,14 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-
+    /**
+     * 初始化事件
+     */
     private void initEvent() {
         myAdapter = new MyAdapter();
         lv_collect.setAdapter(myAdapter);
 
+        //设置ListView Item的点击事件,跳转到详情页面
         lv_collect.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -89,19 +97,24 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
                 int i = Healthyfood.datas.indexOf(data.get(position));
                 intent.putExtra("position", i);
                 startActivity(intent);
-                //  finish();//关闭这个界面
             }
         });
 
+        ////设置ListView Item的长按事件
         lv_collect.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 showDeleteDialog(position);
-                return true;
+                return true;//消化掉此事件,不再进行传递
             }
         });
     }
 
+    /**
+     * 从收藏列表删除的提示对话框
+     *
+     * @param position 食物的位置信息(data集合中的,该集合中全部都是被收藏的食品,从总食品集合中挑选出来的,被收藏的)
+     */
     private void showDeleteDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("删除");
@@ -117,7 +130,9 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Healthyfood healthyfood = data.get(position);
+                //更新该食物的状态为false,即未收藏状态
                 healthyfood.setCollected(false);
+                //将该食物从收藏列表中移除
                 data.remove(healthyfood);
                 myAdapter.notifyDataSetChanged();
                 dialog.dismiss();
@@ -128,6 +143,8 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
 
     /**
      * 准备数据
+     * <p>
+     * 将被收藏的食品从总食品列表中挑选出来
      */
     private void initData() {
         data = new ArrayList<>();
@@ -140,6 +157,9 @@ public class CollectionActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
+    /**
+     * 初始化布局
+     */
     private void initView() {
         tv_simpletype = (TextView) findViewById(R.id.tv_simpletype);
         tv_foodname = (TextView) findViewById(R.id.tv_foodname);

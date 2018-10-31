@@ -1,7 +1,5 @@
 package com.nini.recyclerviewtest.broadcast;
 
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +9,12 @@ import com.nini.recyclerviewtest.DetailActivity;
 import com.nini.recyclerviewtest.bean.Healthyfood;
 import com.nini.recyclerviewtest.utils.NotifcationUtil;
 
+/**
+ * 静态广播
+ * <p>
+ * app启动的时候触发,发送通知栏通知,同时NewAppWidget也会接收到该广播
+ * 两个广播接受者都在AndroidManifest.xml中配置了action常量(<action android:name="com.lv.appstart" />)
+ */
 public class MyStaticBroadcastReceiver extends BroadcastReceiver {
 
     @Override
@@ -20,6 +24,7 @@ public class MyStaticBroadcastReceiver extends BroadcastReceiver {
 
         if (action.equals("com.lv.appstart")) {//app启动的广播
             int intExtra = intent.getIntExtra("position", 0);
+            //发送通知栏消息
             NotifcationUtil.showNotifcation(context, intExtra,
                     "今日推荐",
                     Healthyfood.datas.get(intExtra).getFoodName(),

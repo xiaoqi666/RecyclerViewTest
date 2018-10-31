@@ -74,7 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         /**
          * 设置值action常量,并在AndroidManifest.xml中进行配置
          * 一个是NewAppWidget,一个是MyStaticBroadcastReceiver
-         * 因此,发送的广播,这两个类都可以接收到,
+         * 因此,发送的广播,这两个类都可以接收到
+         *
          * MyStaticBroadcastReceiver 接收到后会发送通知栏消息
          * NewAppWidget被重写了onReceive方法,接收到后会更新widget的界面,为"今日推荐 XXX"
          */
